@@ -23,10 +23,10 @@
 import UIKit
 
 public class LoadingView: UIView {
-
+    
     @IBOutlet public weak var indicatorView: SpringView!
-
-    override public func awakeFromNib() {
+    
+    func animation() {
         let animation = CABasicAnimation()
         animation.keyPath = "transform.rotation.z"
         animation.fromValue = degreesToRadians(0)
@@ -35,48 +35,55 @@ public class LoadingView: UIView {
         animation.repeatCount = HUGE
         indicatorView.layer.addAnimation(animation, forKey: "")
     }
-
+    
     class func designCodeLoadingView() -> UIView {
         return NSBundle(forClass: self).loadNibNamed("LoadingView", owner: self, options: nil)![0] as! UIView
     }
+    
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        animation()
+    }
+    
 }
 
 public extension UIView {
-
+    
     struct LoadingViewConstants {
         static let Tag = 1000
     }
-
+    
     public func showLoading() {
-
+        
         if self.viewWithTag(LoadingViewConstants.Tag) != nil {
             // If loading view is already found in current view hierachy, do nothing
             return
         }
-
+        
         let loadingXibView = LoadingView.designCodeLoadingView()
         loadingXibView.frame = self.bounds
         loadingXibView.tag = LoadingViewConstants.Tag
         self.addSubview(loadingXibView)
-
+        
         loadingXibView.alpha = 0
         SpringAnimation.spring(0.7, animations: {
             loadingXibView.alpha = 1
         })
     }
-
+    
     public func hideLoading() {
-
+        
         if let loadingXibView = self.viewWithTag(LoadingViewConstants.Tag) {
             loadingXibView.alpha = 1
-
+            
             SpringAnimation.springWithCompletion(0.7, animations: {
                 loadingXibView.alpha = 0
                 loadingXibView.transform = CGAffineTransformMakeScale(3, 3)
-            }, completion: { (completed) -> Void in
-                loadingXibView.removeFromSuperview()
+                }, completion: { (completed) -> Void in
+                    loadingXibView.removeFromSuperview()
             })
         }
     }
-
+    
 }
